@@ -1,19 +1,15 @@
 # CleanYourAndroid
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/cleanyourandroid/cleanyourandroid/main/docs/assets/banner.png" alt="CleanYourAndroid Banner" width="800" />
-</p>
-
-<p align="center">
   <strong>Production-Grade Android Debloating, Customization, and Device Management Toolkit</strong>
 </p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/cleanyourandroid"><img src="https://img.shields.io/npm/v/cleanyourandroid.svg?style=flat-square&color=E50914" alt="npm version" /></a>
-  <a href="https://github.com/cleanyourandroid/cleanyourandroid/actions"><img src="https://img.shields.io/github/actions/workflow/status/cleanyourandroid/cleanyourandroid/ci.yml?branch=main&style=flat-square" alt="CI Status" /></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License" /></a>
-  <a href="https://www.npmjs.com/package/cleanyourandroid"><img src="https://img.shields.io/npm/dm/cleanyourandroid?style=flat-square&color=black" alt="Downloads" /></a>
-  <a href="https://github.com/cleanyourandroid/cleanyourandroid/stargazers"><img src="https://img.shields.io/github/stars/cleanyourandroid/cleanyourandroid.svg?style=flat-square" alt="GitHub stars" /></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg?style=flat-square" alt="Node version" /></a>
+  <a href="https://developer.android.com/tools/adb"><img src="https://img.shields.io/badge/Android-ADB%20Non--Root-orange.svg?style=flat-square" alt="Android ADB" /></a>
+  <a href="https://github.com/topics/android"><img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg?style=flat-square" alt="Platform" /></a>
 </p>
 
 ---

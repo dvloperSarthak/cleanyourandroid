@@ -1,6 +1,6 @@
 {
   "name": "cleanyourandroid",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "CleanYourAndroid CLI — open-source Android customization and debloating toolkit",
   "type": "module",
   "bin": {

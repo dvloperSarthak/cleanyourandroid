@@ -123,3 +123,4 @@ pnpm --filter @cleanyourandroid/desktop run build
 
 - **ADB missing in PATH**: The ADB resolver in `packages/adb/src/index.ts` automatically searches `ANDROID_HOME`, `ANDROID_SDK_ROOT`, and standard platform-tools directories across Windows, macOS, and Linux. If testing in an unusual environment, set the `ADB_PATH` environment variable.
 - **Wireless Port Switching**: Android 11+ uses a temporary pairing port for `adb pair <ip>:<pair_port> <code>`, and a persistent connection port for `adb connect <ip>:<connect_port>`. Do not mix the two.
+
