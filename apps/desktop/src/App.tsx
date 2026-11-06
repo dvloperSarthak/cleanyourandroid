@@ -7,7 +7,6 @@ import {
   Palette,
   ShieldAlert,
   Battery,
-  RotateCcw,
   RefreshCw,
   CheckCircle2,
   AlertTriangle,
@@ -19,7 +18,10 @@ import {
   Sparkles,
   ExternalLink,
   Power,
-  Activity
+  Activity,
+  Layers,
+  Flame,
+  Feather
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5174/api';
@@ -32,6 +34,13 @@ const THEME_CARDS = [
   { id: 'amoled-dark', name: 'Deep AMOLED Midnight', desc: '100% pitch-black OLED background, zero idle subpixel power', color: '#00E676' }
 ];
 
+const SPEED_PRESETS = [
+  { id: 'warp', name: '0.25x Lightning Snappy', speed: 0.25, badge: 'Ultra Fast', desc: 'Instantaneous UI reactions, skips long transition delays' },
+  { id: 'feather', name: '0.35x Featherweight Fluid', speed: 0.35, badge: 'Bestest Balance', desc: 'Silky smooth high-refresh-rate motion with zero perceived lag' },
+  { id: 'nothing', name: '0.50x Nothing OS Crisp', speed: 0.5, badge: 'Recommended', desc: 'Sharp, responsive dot-matrix pacing preferred by power users' },
+  { id: 'default', name: '1.00x Stock Android', speed: 1.0, badge: 'Factory Default', desc: 'Standard manufacturer animation duration curves' }
+];
+
 const SHORTCUTS = [
   { id: 'developer_options', title: 'Developer Options', desc: 'USB debugging, pointer location & GPU rendering', icon: Sliders },
   { id: 'battery_saver', title: 'Battery & Power', desc: 'Adaptive charging, power saving & background limits', icon: Battery },
@@ -41,7 +50,7 @@ const SHORTCUTS = [
 ];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'debloat' | 'customize' | 'themes' | 'screen' | 'processes' | 'shortcuts'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'animations' | 'treble' | 'debloat' | 'themes' | 'screen' | 'processes' | 'shortcuts'>('dashboard');
   const [deviceInfo, setDeviceInfo] = useState<any>(null);
   const [settings, setSettings] = useState<any>(null);
   const [storage, setStorage] = useState<any>(null);
@@ -49,12 +58,11 @@ export default function App() {
   const [bloatList, setBloatList] = useState<any[]>([]);
   const [selectedBloat, setSelectedBloat] = useState<string[]>([]);
   const [processes, setProcesses] = useState<any[]>([]);
+  const [trebleInfo, setTrebleInfo] = useState<any>(null);
   const [screenUrl, setScreenUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshingScreen, setRefreshingScreen] = useState<boolean>(false);
-  const [animSpeed, setAnimSpeed] = useState<number>(1.0);
-  const [dpi, setDpi] = useState<number>(300);
-  const [darkMode, setDarkMode] = useState<boolean>(true);
+  const [animSpeed, setAnimSpeed] = useState<number>(0.35);
   const [appliedTheme, setAppliedTheme] = useState<string>('default');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -75,12 +83,6 @@ export default function App() {
 
         if (infoRes.settings?.windowAnimationScale !== undefined) {
           setAnimSpeed(infoRes.settings.windowAnimationScale);
-        }
-        if (infoRes.settings?.displayDensityDpi) {
-          setDpi(infoRes.settings.displayDensityDpi);
-        }
-        if (infoRes.settings?.darkModeEnabled !== undefined) {
-          setDarkMode(infoRes.settings.darkModeEnabled);
         }
       }
 
@@ -128,13 +130,48 @@ export default function App() {
     }
   };
 
+  const handleLoadTreble = async () => {
+    if (!deviceInfo) return;
+    try {
+      const res = await fetch(`${API_BASE}/device/treble-audit?serial=${deviceInfo.serial}`).then((r) => r.json());
+      setTrebleInfo(res);
+    } catch (err: any) {
+      showToast(`Treble audit failed: ${err.message}`);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === 'processes') {
       handleLoadProcesses();
     } else if (activeTab === 'screen' && !screenUrl) {
       handleCaptureScreen();
+    } else if (activeTab === 'treble') {
+      handleLoadTreble();
     }
   }, [activeTab]);
+
+  const handleApplyAnimationSpeed = async (speed: number) => {
+    if (!deviceInfo) return;
+    setAnimSpeed(speed);
+    showToast(`Applying ${speed}x lightweight animation scale...`);
+    try {
+      const res = await fetch(`${API_BASE}/device/settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          serial: deviceInfo.serial,
+          animationScale: speed
+        })
+      }).then((r) => r.json());
+
+      if (res.settings) {
+        setSettings(res.settings);
+        showToast(`✓ Phone set to ${speed}x lightweight speed! Test opening apps now.`);
+      }
+    } catch (err: any) {
+      showToast(`Error: ${err.message}`);
+    }
+  };
 
   const handleCleanCache = async () => {
     if (!deviceInfo) return;
@@ -240,30 +277,6 @@ export default function App() {
     }
   };
 
-  const handleSaveTuning = async () => {
-    if (!deviceInfo) return;
-    showToast('Applying live tuning settings to your phone...');
-    try {
-      const res = await fetch(`${API_BASE}/device/settings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          serial: deviceInfo.serial,
-          animationScale: animSpeed,
-          displayDensityDpi: dpi,
-          darkModeEnabled: darkMode
-        })
-      }).then((r) => r.json());
-
-      if (res.settings) {
-        setSettings(res.settings);
-        showToast('✓ Settings applied to phone successfully!');
-      }
-    } catch (err: any) {
-      showToast(`Error: ${err.message}`);
-    }
-  };
-
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#09090b] text-[#f4f4f5]">
       {/* Toast Notification */}
@@ -317,6 +330,26 @@ export default function App() {
           </button>
 
           <button
+            onClick={() => setActiveTab('animations')}
+            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
+              activeTab === 'animations' ? 'bg-[#1e1e24] text-white' : 'text-neutral-400 hover:bg-[#151518] hover:text-white'
+            }`}
+          >
+            <Flame className="h-4 w-4 text-orange-400" />
+            Lightweight Animations
+          </button>
+
+          <button
+            onClick={() => setActiveTab('treble')}
+            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
+              activeTab === 'treble' ? 'bg-[#1e1e24] text-white' : 'text-neutral-400 hover:bg-[#151518] hover:text-white'
+            }`}
+          >
+            <Layers className="h-4 w-4 text-blue-400" />
+            Android Upgrade Hub
+          </button>
+
+          <button
             onClick={() => setActiveTab('screen')}
             className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
               activeTab === 'screen' ? 'bg-[#1e1e24] text-white' : 'text-neutral-400 hover:bg-[#151518] hover:text-white'
@@ -349,16 +382,6 @@ export default function App() {
           >
             <Palette className="h-4 w-4" />
             Aesthetic Themes
-          </button>
-
-          <button
-            onClick={() => setActiveTab('customize')}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
-              activeTab === 'customize' ? 'bg-[#1e1e24] text-white' : 'text-neutral-400 hover:bg-[#151518] hover:text-white'
-            }`}
-          >
-            <Sliders className="h-4 w-4" />
-            System Tuning
           </button>
 
           <button
@@ -491,12 +514,150 @@ export default function App() {
                       <span className="font-medium text-neutral-300">{deviceInfo.software.securityPatch}</span>
                     </div>
                     <div className="flex justify-between border-b border-[#27272a]/60 pb-2">
+                      <span className="text-neutral-400">Current Animation Scale</span>
+                      <span className="font-medium text-[#E50914]">{settings?.windowAnimationScale ?? animSpeed}x</span>
+                    </div>
+                    <div className="flex justify-between border-b border-[#27272a]/60 pb-2">
                       <span className="text-neutral-400">Build ID</span>
                       <span className="font-medium text-neutral-300">{deviceInfo.software.buildId}</span>
                     </div>
-                    <div className="flex justify-between border-b border-[#27272a]/60 pb-2">
-                      <span className="text-neutral-400">Current Animation Scale</span>
-                      <span className="font-medium text-[#E50914]">{settings?.windowAnimationScale ?? animSpeed}x</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* LIGHTWEIGHT ANIMATIONS TAB */}
+            {activeTab === 'animations' && (
+              <div className="space-y-6">
+                <header>
+                  <h1 className="text-2xl font-bold tracking-tight text-white">Lightweight & Fluid Animation Speeds</h1>
+                  <p className="text-sm text-neutral-400">
+                    Instantly make your phone feel 3x faster by tuning window, transition, and animator durations.
+                  </p>
+                </header>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {SPEED_PRESETS.map((preset) => {
+                    const isCurrent = Math.abs((settings?.windowAnimationScale ?? animSpeed) - preset.speed) < 0.05;
+                    return (
+                      <div
+                        key={preset.id}
+                        onClick={() => handleApplyAnimationSpeed(preset.speed)}
+                        className={`group cursor-pointer rounded-xl border p-5 transition ${
+                          isCurrent
+                            ? 'border-[#E50914] bg-[#16161a] ring-1 ring-[#E50914]'
+                            : 'border-[#27272a] bg-[#121214] hover:border-neutral-600'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Feather className="h-4 w-4 text-orange-400" />
+                            <h3 className="font-semibold text-white">{preset.name}</h3>
+                          </div>
+                          <span className={`rounded px-2 py-0.5 text-[10px] font-bold ${
+                            isCurrent ? 'bg-[#E50914] text-white' : 'bg-neutral-800 text-neutral-400'
+                          }`}>
+                            {isCurrent ? 'ACTIVE ON PHONE' : preset.badge}
+                          </span>
+                        </div>
+                        <p className="mt-3 text-xs text-neutral-400 leading-relaxed">{preset.desc}</p>
+                        <div className="mt-4 flex items-center justify-between pt-3 border-t border-[#27272a] text-xs text-neutral-400">
+                          <span className="font-dot text-[#E50914] font-semibold">{preset.speed}x scale</span>
+                          <span className="group-hover:text-white transition">Tap to apply to phone →</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Fine Tuning Slider Card */}
+                <div className="rounded-xl border border-[#27272a] bg-[#121214] p-5 space-y-4">
+                  <div className="flex justify-between items-center text-sm">
+                    <div>
+                      <div className="font-semibold text-white">Custom Precision Slider</div>
+                      <div className="text-xs text-neutral-400">Custom decimal scale for advanced smoothness tuning</div>
+                    </div>
+                    <span className="font-dot text-lg font-bold text-[#E50914]">{animSpeed}x</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1.5"
+                    step="0.05"
+                    value={animSpeed}
+                    onChange={(e) => setAnimSpeed(parseFloat(e.target.value))}
+                    className="w-full accent-[#E50914]"
+                  />
+                  <div className="flex justify-end gap-3 pt-2">
+                    <button
+                      onClick={() => handleApplyAnimationSpeed(animSpeed)}
+                      className="rounded-lg bg-[#E50914] px-4 py-2 text-xs font-semibold text-white shadow-lg hover:bg-[#c40811] transition"
+                    >
+                      Set Custom Scale
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ANDROID UPGRADE & TREBLE HUB */}
+            {activeTab === 'treble' && (
+              <div className="space-y-6">
+                <header>
+                  <h1 className="text-2xl font-bold tracking-tight text-white">OS Modernizer & Upgrade Readiness</h1>
+                  <p className="text-sm text-neutral-400">
+                    Live hardware capability audit for Generic System Images (GSI), Project Treble, and Custom ROM support.
+                  </p>
+                </header>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="rounded-xl border border-[#27272a] bg-[#121214] p-4">
+                    <div className="text-xs uppercase font-dot text-neutral-400">Project Treble</div>
+                    <div className="mt-2 text-xl font-bold text-emerald-400">
+                      {trebleInfo?.trebleSupported ? '✓ Fully Supported' : 'Unsupported'}
+                    </div>
+                    <div className="text-xs text-neutral-500 mt-1">Can run vendor-independent AOSP images</div>
+                  </div>
+
+                  <div className="rounded-xl border border-[#27272a] bg-[#121214] p-4">
+                    <div className="text-xs uppercase font-dot text-neutral-400">Architecture & ABI</div>
+                    <div className="mt-2 text-xl font-bold text-white">{trebleInfo?.cpuArchitecture || 'arm64-v8a'}</div>
+                    <div className="text-xs text-neutral-500 mt-1">GSI Target: {trebleInfo?.gsiTargetArch || 'arm64_bvN'}</div>
+                  </div>
+
+                  <div className="rounded-xl border border-[#27272a] bg-[#121214] p-4">
+                    <div className="text-xs uppercase font-dot text-neutral-400">Bootloader Status</div>
+                    <div className="mt-2 text-xl font-bold text-amber-400">
+                      {trebleInfo?.bootloaderLocked ? 'OEM Locked' : 'Unlocked'}
+                    </div>
+                    <div className="text-xs text-neutral-500 mt-1">Unlock in Developer Options to flash ROMs</div>
+                  </div>
+                </div>
+
+                {/* Upgrade Roadmap & Safe Visual Backport */}
+                <div className="rounded-xl border border-[#27272a] bg-[#121214] p-5 space-y-4">
+                  <h2 className="text-base font-semibold text-white">How To Upgrade Your Phone Beyond End-Of-Life</h2>
+
+                  <div className="space-y-3 text-xs text-neutral-300">
+                    <div className="p-3 rounded-lg bg-neutral-900 border border-neutral-800">
+                      <span className="font-bold text-white">Method 1: Safe Next-Gen Visual Modernizer (Recommended - No Root / No Risk)</span>
+                      <p className="mt-1 text-neutral-400">
+                        Keeps your stock security and banking apps 100% functional. Debloats background carrier junk, sets 0.35x fluid animations, and installs modern launchers (Lawnchair 14 / Pixel Launcher) to match Android 15/16 looks.
+                      </p>
+                    </div>
+
+                    <div className="p-3 rounded-lg bg-neutral-900 border border-neutral-800">
+                      <span className="font-bold text-white">Method 2: Generic System Image (GSI) / Dynamic System Updates (DSU)</span>
+                      <p className="mt-1 text-neutral-400">
+                        Because your phone has <strong>Project Treble Enabled (VNDK 33)</strong>, it can boot Google GSI releases without wiping user data using Android's built-in DSU Loader.
+                      </p>
+                    </div>
+
+                    <div className="p-3 rounded-lg bg-neutral-900 border border-neutral-800">
+                      <span className="font-bold text-white">Method 3: Community Custom ROM (LineageOS / PixelOS)</span>
+                      <p className="mt-1 text-neutral-400">
+                        Requires unlocking the bootloader via Samsung Download Mode (ODIN). Community builds provide updated security patches and pure Android versions for years after official OEM support expires.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -736,96 +897,6 @@ export default function App() {
                       </div>
                     );
                   })}
-                </div>
-              </div>
-            )}
-
-            {/* CUSTOMIZE TAB */}
-            {activeTab === 'customize' && (
-              <div className="space-y-6">
-                <header>
-                  <h1 className="text-2xl font-bold tracking-tight text-white">Real-Time Phone Settings Tuning</h1>
-                  <p className="text-sm text-neutral-400">Adjust the actual animation speed and DPI of your {deviceInfo?.hardware.model}.</p>
-                </header>
-
-                <div className="rounded-xl border border-[#27272a] bg-[#121214] p-5 space-y-6">
-                  {/* Animation Speed */}
-                  <div>
-                    <div className="flex justify-between text-sm">
-                      <label className="font-medium text-white">Window & Transition Animation Scale</label>
-                      <span className="font-dot text-[#E50914] font-bold">{animSpeed}x</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="1.5"
-                      step="0.25"
-                      value={animSpeed}
-                      onChange={(e) => setAnimSpeed(parseFloat(e.target.value))}
-                      className="mt-3 w-full accent-[#E50914]"
-                    />
-                    <div className="mt-1 flex justify-between text-[11px] text-neutral-500">
-                      <span>0.0x (Instant)</span>
-                      <span>0.5x (Snappy)</span>
-                      <span>1.0x (Default)</span>
-                      <span>1.5x (Slow)</span>
-                    </div>
-                  </div>
-
-                  {/* Display Density */}
-                  <div className="pt-4 border-t border-[#27272a]">
-                    <div className="flex justify-between text-sm">
-                      <label className="font-medium text-white">Display Density (DPI Override)</label>
-                      <span className="font-dot text-white">{dpi} DPI</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="240"
-                      max="480"
-                      step="10"
-                      value={dpi}
-                      onChange={(e) => setDpi(parseInt(e.target.value, 10))}
-                      className="mt-3 w-full accent-[#E50914]"
-                    />
-                    <p className="mt-1 text-[11px] text-neutral-500">Physical density: 300 DPI.</p>
-                  </div>
-
-                  {/* Dark mode */}
-                  <div className="pt-4 border-t border-[#27272a] flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-white text-sm">System Dark Theme</div>
-                      <div className="text-xs text-neutral-400">Toggles Android 16 system night mode via ADB</div>
-                    </div>
-                    <button
-                      onClick={() => setDarkMode(!darkMode)}
-                      className={`rounded-full px-4 py-1 text-xs font-semibold transition ${
-                        darkMode ? 'bg-[#E50914] text-white' : 'bg-neutral-800 text-neutral-400'
-                      }`}
-                    >
-                      {darkMode ? 'Enabled' : 'Disabled'}
-                    </button>
-                  </div>
-
-                  <div className="pt-4 border-t border-[#27272a] flex justify-end gap-3">
-                    <button
-                      onClick={() => {
-                        setAnimSpeed(1.0);
-                        setDpi(300);
-                        setDarkMode(true);
-                        showToast('Reset values to device physical defaults');
-                      }}
-                      className="flex items-center gap-1.5 rounded-lg border border-[#27272a] px-4 py-2 text-xs font-medium text-neutral-300 hover:bg-[#18181b]"
-                    >
-                      <RotateCcw className="h-3.5 w-3.5" />
-                      Reset Defaults
-                    </button>
-                    <button
-                      onClick={handleSaveTuning}
-                      className="rounded-lg bg-[#E50914] px-4 py-2 text-xs font-semibold text-white shadow-lg hover:bg-[#c40811]"
-                    >
-                      Save & Apply to Phone
-                    </button>
-                  </div>
                 </div>
               </div>
             )}
