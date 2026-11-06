@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true
+  },
+  "references": [
+    { "path": "../shared" },
+    { "path": "../adb" },
+    { "path": "../device" },
+    { "path": "../debloater" },
+    { "path": "../customizer" },
+    { "path": "../themes" },
+    { "path": "../backup" }
+  ],
+  "include": ["src/**/*"]
+}
+

@@ -1,0 +1,25 @@
+{
+  "name": "@cleanyourandroid/adb",
+  "version": "1.0.0",
+  "description": "Safe, typed, injection-proof ADB platform-tools wrapper for CleanYourAndroid",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rimraf dist tsconfig.tsbuildinfo"
+  },
+  "dependencies": {
+    "@cleanyourandroid/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
+

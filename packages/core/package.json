@@ -1,0 +1,31 @@
+{
+  "name": "@cleanyourandroid/core",
+  "version": "1.0.0",
+  "description": "Unified orchestration manager for CleanYourAndroid",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rimraf dist tsconfig.tsbuildinfo"
+  },
+  "dependencies": {
+    "@cleanyourandroid/shared": "workspace:*",
+    "@cleanyourandroid/adb": "workspace:*",
+    "@cleanyourandroid/device": "workspace:*",
+    "@cleanyourandroid/debloater": "workspace:*",
+    "@cleanyourandroid/customizer": "workspace:*",
+    "@cleanyourandroid/themes": "workspace:*",
+    "@cleanyourandroid/backup": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
+

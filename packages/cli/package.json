@@ -1,0 +1,36 @@
+{
+  "name": "cleanyourandroid",
+  "version": "1.0.0",
+  "description": "CleanYourAndroid CLI — open-source Android customization and debloating toolkit",
+  "type": "module",
+  "bin": {
+    "cleanyourandroid": "./bin/cya.js",
+    "cya": "./bin/cya.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "dev": "node ./bin/cya.js"
+  },
+  "dependencies": {
+    "@cleanyourandroid/shared": "workspace:*",
+    "@cleanyourandroid/core": "workspace:*",
+    "commander": "^13.1.0",
+    "chalk": "^5.4.1",
+    "inquirer": "^12.4.2",
+    "ora": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "typescript": "^5.7.3"
+  }
+}
+

@@ -1,0 +1,26 @@
+{
+  "name": "@cleanyourandroid/themes",
+  "version": "1.0.0",
+  "description": "Design presets, Nothing OS, Pixel, Samsung, and AMOLED theme engine",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rimraf dist tsconfig.tsbuildinfo"
+  },
+  "dependencies": {
+    "@cleanyourandroid/shared": "workspace:*",
+    "@cleanyourandroid/customizer": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
+

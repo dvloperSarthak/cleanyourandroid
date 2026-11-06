@@ -1,0 +1,25 @@
+{
+  "name": "@cleanyourandroid/shared",
+  "version": "1.0.0",
+  "description": "Shared models, schemas, and error types for CleanYourAndroid",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rimraf dist tsconfig.tsbuildinfo"
+  },
+  "dependencies": {
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
+
