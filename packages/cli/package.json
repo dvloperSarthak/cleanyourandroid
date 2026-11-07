@@ -1,7 +1,16 @@
 {
   "name": "cleanyourandroid",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "CleanYourAndroid CLI — open-source Android customization and debloating toolkit",
+  "homepage": "https://github.com/dvloperSarthak/cleanyourandroid#readme",
+  "bugs": {
+    "url": "https://github.com/dvloperSarthak/cleanyourandroid/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dvloperSarthak/cleanyourandroid.git",
+    "directory": "packages/cli"
+  },
   "type": "module",
   "bin": {
     "cleanyourandroid": "./bin/cya.js",
