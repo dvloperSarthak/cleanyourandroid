@@ -1,6 +1,10 @@
 # CleanYourAndroid
 
 <p align="center">
+  <img src="https://raw.githubusercontent.com/dvloperSarthak/cleanyourandroid/main/docs/assets/logo.svg" alt="CleanYourAndroid Logo Banner" width="760" />
+</p>
+
+<p align="center">
   <strong>Production-Grade Android Debloating, Customization, and Device Management Toolkit</strong>
 </p>
 
